@@ -1,0 +1,70 @@
+using System.Collections.Generic;
+using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Input;
+using Avalonia.Markup.Xaml;
+using AvaloniaApplication2.Models;
+using Newtonsoft.Json;
+
+namespace AvaloniaApplication2.Pages;
+
+public partial class MainPage : UserControl
+{
+    private Border? _draggedTile;
+
+    private void Tile_PointerPressed(object? sender, PointerPressedEventArgs e)
+    {
+        if (sender is Border tile)
+        {
+            _draggedTile = tile;
+            e.Pointer.Capture(tile);
+        }
+    }
+    private void Tile_PointerMoved(object? sender, PointerEventArgs e)
+    {
+        if (_draggedTile == null)
+            return;
+
+        var point = e.GetPosition(TilesPanel);
+
+        foreach (var child in TilesPanel.Children)
+        {
+            if (child is Border target && target != _draggedTile)
+            {
+                if (target.Bounds.Contains(point))
+                {
+                    int from = TilesPanel.Children.IndexOf(_draggedTile);
+                    int to = TilesPanel.Children.IndexOf(target);
+
+                    if (from != to)
+                    {
+                        TilesPanel.Children.RemoveAt(from);
+                        TilesPanel.Children.Insert(to, _draggedTile);
+                    }
+                    break;
+                }
+            }
+        }
+    }
+
+    private void Tile_PointerReleased(object? sender, PointerReleasedEventArgs e)
+    {
+        if (_draggedTile != null)
+            _draggedTile = null;
+    }
+    
+    public MainPage()
+    {
+        InitializeComponent();
+        LoadNews();
+    }
+
+    public async void LoadNews()
+    {
+        var client = App.currentClient;
+        var response = await client.GetAsync("http://localhost:5031/api/news");
+        var json = await response.Content.ReadAsStringAsync();
+        var news = JsonConvert.DeserializeObject<List<News>>(json);
+        NewsList.ItemsSource = news;
+    }
+}

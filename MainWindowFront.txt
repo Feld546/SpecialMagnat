@@ -1,0 +1,128 @@
+<StackPanel Height="1000" Grid.Row="1">
+        <SplitView Height="1000" x:Name="Pane" IsPaneOpen="True" OpenPaneLength="200" 
+                   DisplayMode="CompactInline" CompactPaneLength="35" PaneBackground="Black">
+            <SplitView.Pane>
+                <StackPanel>
+                    <Button x:Name="ClosePaneButton" Click="ClosePaneButton_OnClick" Background="Black" HorizontalAlignment="Right">
+                        <StackPanel Orientation="Horizontal" Spacing="90" FlowDirection="RightToLeft">
+                            <PathIcon Foreground="White" Data="{StaticResource barsIcon}"></PathIcon>
+                            <TextBlock Foreground="White">Навигация</TextBlock>
+                        </StackPanel>
+                        
+                    </Button>
+                    <Button x:Name="MainPageButton" Click="MainPageButton_OnClick" Background="Black">
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <PathIcon Foreground="White" Data="{StaticResource searchIcon}"></PathIcon>
+                            <TextBlock Foreground="White">Главная</TextBlock> 
+                        </StackPanel>
+
+                    </Button>
+                    <Button x:Name="MonitoringPageButton" Click="MonitoringPageButton_OnClick" Background="Black">
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                        <PathIcon Foreground="White" Data="{StaticResource desktopIcon}"></PathIcon>
+                        <TextBlock Foreground="White">Мониторинг ТА</TextBlock>    
+                        </StackPanel>
+                    </Button>
+                    <Expander Background="Black" CornerRadius="0" IsExpanded="False" Foreground="White">
+                        <Expander.Header>
+                            <StackPanel Orientation="Horizontal" Spacing="10">
+                                <PathIcon Foreground="White" Data="{StaticResource documentIcon}"></PathIcon>
+                            <TextBlock Margin="0, 20" Foreground="White">Детальные отчёты</TextBlock>
+                            </StackPanel>
+                            
+                    
+                        </Expander.Header>
+                        
+                        <Expander.Styles>
+                            <Style Selector="Expander/template/ToggleButton">
+                                <Setter Property="Background" Value="Black"></Setter>
+                                <Setter Property="Foreground" Value="White"></Setter>
+                                <Setter Property="Padding" Value="7, 0"></Setter>
+                            </Style>
+                            
+                            <Style Selector="Expander/template/ToggleButton/template/Path">
+                                <Setter Property="Fill" Value="White"></Setter>
+                            </Style>
+                        </Expander.Styles>
+                        
+                        <StackPanel>
+                            <Button Background="Black" Content="Ok" Foreground="White" FontSize="12"></Button>
+                            <Button Background="Black" Content="Ok" Foreground="White" FontSize="12"></Button>
+                            <Button Background="Black" Content="Ok" Foreground="White" FontSize="12"></Button>
+                            <Button Background="Black" Content="Ok" Foreground="White" FontSize="12"></Button>
+                        </StackPanel>
+                    </Expander>
+                    <Expander Background="Black" CornerRadius="0" IsExpanded="False" Foreground="White">
+                        <Expander.Header>
+                                <StackPanel Orientation="Horizontal" Spacing="10">
+                                    <PathIcon Foreground="White" Data="{StaticResource shoppingCartIcon}"></PathIcon>
+                                    <TextBlock Foreground="White">Учёт ТМЦ</TextBlock>    
+                                </StackPanel>
+                        </Expander.Header>
+                        
+                        <Expander.Styles>
+                            <Style Selector="Expander/template/ToggleButton">
+                                <Setter Property="Background" Value="Black"></Setter>
+                                <Setter Property="Foreground" Value="White"></Setter>
+                                <Setter Property="Padding" Value="7, 0"></Setter>
+                            </Style>
+                            
+                            <Style Selector="Expander/template/ToggleButton/template/Path">
+                                <Setter Property="Fill" Value="White"></Setter>
+                            </Style>
+                        </Expander.Styles>
+                        
+                        <StackPanel>
+                            <Button Background="Black" Content="Ok" Foreground="White" FontSize="12"></Button>
+                            <Button Background="Black" Content="Ok" Foreground="White" FontSize="12"></Button>
+                            <Button Background="Black" Content="Ok" Foreground="White" FontSize="12"></Button>
+                            <Button Background="Black" Content="Ok" Foreground="White" FontSize="12"></Button>
+                        </StackPanel>
+                    </Expander>
+                    <Expander Background="Black" CornerRadius="0" IsExpanded="False" Foreground="White">
+                        <Expander.Header>
+                            <StackPanel Orientation="Horizontal" Spacing="10">
+                                <PathIcon Foreground="White" Data="{StaticResource cogsIcon}"></PathIcon>
+                                <TextBlock Foreground="White">Администрирование</TextBlock>    
+                            </StackPanel>
+                        </Expander.Header>
+                        
+                        <Expander.Styles>
+                            <Style Selector="Expander/template/ToggleButton">
+                                <Setter Property="Background" Value="Black"></Setter>
+                                <Setter Property="Foreground" Value="White"></Setter>
+                                <Setter Property="Padding" Value="7, 0"></Setter>
+                            </Style>
+                            
+                            <Style Selector="Expander/template/ToggleButton/template/Path">
+                                <Setter Property="Fill" Value="White"></Setter>
+                            </Style>
+                        </Expander.Styles>
+                        
+                        <StackPanel>
+                            <Button Name="VendingMachineButton" Click="VendingMachineButton_OnClick" Background="Black" Content="Торговые автоматы" Foreground="White" FontSize="12"></Button>
+                            <Button Background="Black" Content="Компании" Foreground="White" FontSize="12"></Button>
+                            <Button Background="Black" Content="Пользователи" Foreground="White" FontSize="12"></Button>
+                            <Button Background="Black" Content="Модемы" Foreground="White" FontSize="12"></Button>
+                            <Button Background="Black" Content="Дополнительные" Foreground="White" FontSize="12"></Button>
+                        </StackPanel>
+                    </Expander>
+                </StackPanel>
+            </SplitView.Pane>
+            <SplitView.Content>
+                <StackPanel Background="Gray">
+                <Grid Background="Black" ColumnDefinitions="*, Auto, *">
+                    <TextBlock Grid.Column="0" Foreground="White" FontSize="16" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="10,0">ООО ТОРГОВЫЕ АППАРАТЫ</TextBlock>
+                    <TextBlock  Name="PageAdress" Grid.Column="2" Foreground="Gray" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Right"></TextBlock>
+                </Grid>
+                    <DockPanel Background="Gray">
+                        <Rectangle Height="30" DockPanel.Dock="Top" Fill="Gray"></Rectangle>
+                        <Rectangle Height="20" DockPanel.Dock="Bottom" Fill="Gray"></Rectangle>
+                        <Rectangle Width="20" DockPanel.Dock="Right" Fill="Gray"></Rectangle>
+                        <Rectangle Width="40" DockPanel.Dock="Left" Fill="Gray"></Rectangle>
+                    <ContentControl Name="CurrentPage"></ContentControl>
+                    </DockPanel>
+                </StackPanel>
+            </SplitView.Content>
+        </SplitView>
+    </StackPanel>

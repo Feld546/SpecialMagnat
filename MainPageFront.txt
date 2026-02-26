@@ -1,0 +1,65 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="AvaloniaApplication2.Pages.MainPage">
+    <WrapPanel x:Name="TilesPanel" Margin="10" Background="Gray">
+
+        <Border Width="250" Height="150" Margin="10" Background="White"
+                PointerPressed="Tile_PointerPressed"
+                PointerMoved="Tile_PointerMoved"
+                PointerReleased="Tile_PointerReleased">
+            <StackPanel>
+                <TextBlock Text="Эффективность сети"
+                           HorizontalAlignment="Center"
+                           FontWeight="Bold" />
+            </StackPanel>
+        </Border>
+
+        <Border Width="250" Height="150" Margin="10" Background="White"
+                PointerPressed="Tile_PointerPressed"
+                PointerMoved="Tile_PointerMoved"
+                PointerReleased="Tile_PointerReleased">
+            <TextBlock Text="Состояние сети"
+                       HorizontalAlignment="Center" />
+        </Border>
+
+        <Border  Width="250" Height="150" Margin="10" Background="White"
+                 PointerPressed="Tile_PointerPressed"
+                 PointerMoved="Tile_PointerMoved"
+                 PointerReleased="Tile_PointerReleased">
+            <TextBlock Text="Сводка"
+                       HorizontalAlignment="Center" />
+        </Border>
+
+        <Border  Width="250" Height="150" Margin="10" Background="White"
+                 PointerPressed="Tile_PointerPressed"
+                 PointerMoved="Tile_PointerMoved"
+                 PointerReleased="Tile_PointerReleased">
+            <TextBlock Text="Динамика продаж"
+                       HorizontalAlignment="Center" />
+        </Border>
+
+        <Border  Width="250" Height="150" Margin="10" Background="White"
+                 PointerPressed="Tile_PointerPressed"
+                 PointerMoved="Tile_PointerMoved"
+                 PointerReleased="Tile_PointerReleased">
+            <StackPanel>
+                <TextBlock Text="Новости" HorizontalAlignment="Center" />
+                <ListBox x:Name="NewsList">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal" Margin="5">
+                                <TextBlock Text="{ReflectionBinding Date}" FontSize="12" />
+                                <TextBlock Margin="15, 0" Text="{ReflectionBinding Text}" TextDecorations="Underline" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </StackPanel>
+
+        </Border>
+
+    </WrapPanel>
+</UserControl>

@@ -1,0 +1,72 @@
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Security.Cryptography;
+using System.Text;
+using FinalApi.Models;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+
+namespace FinalApi.Controllers
+{
+    [Route("auth/")]
+    [ApiController]
+    public class AuthorizationController : ControllerBase
+    {
+        private readonly User4Context _user4Context;
+        public AuthorizationController(User4Context user4Context)
+        {
+            _user4Context = user4Context;
+        }
+
+        static string GenerateHash(string password)
+        {
+            return Convert.ToBase64String(SHA512.Create().ComputeHash(Encoding.UTF8.GetBytes(password)));
+        }
+
+        [HttpPost("login")]
+        public IActionResult JwtAuthorization(AuthorizationData data)
+        {
+            try
+            {
+                var user = _user4Context.Users.Include(x=> x.Role).FirstOrDefault(x => x.Email == data.Email && x.Password == GenerateHash(data.Password));
+                if (user == null)
+                    return StatusCode(403, "User not found");
+                else
+                {
+                    var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("super_secret_key_1234567890123456"));
+                    var signinCredentials = new SigningCredentials(secretKey, SecurityAlgorithms.HmacSha256);
+                    
+                    var claims = new[]
+                    {
+                        new Claim(ClaimTypes.Name, $"{data.Email}"),
+                        new Claim(ClaimTypes.Role, "User")
+                    };
+
+                    var tokenOptions = new JwtSecurityToken(
+                        issuer: "http://localhost:5031",
+                        audience: "http://localhost:5031",
+                        claims: claims,
+                        expires: DateTime.UtcNow.AddMinutes(20),
+                        signingCredentials: signinCredentials);
+
+                    var token = new JwtSecurityTokenHandler().WriteToken(tokenOptions);
+
+
+                    return Ok(new { Token = token, User = new{
+
+                        FullName = user.FullName,
+                        Role = user.Role?.Name,
+                        ImageBase64 = user.ImageBase64
+                    } });
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Ошибка: {ex.Message}");
+            }
+        }
+
+    }
+}

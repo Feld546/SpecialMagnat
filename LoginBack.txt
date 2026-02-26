@@ -1,0 +1,59 @@
+using System.Net.Http;
+using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Interactivity;
+using Avalonia.Markup.Xaml;
+using System;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Threading;
+using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Interactivity;
+using Avalonia.Markup.Xaml;
+using AvaloniaApplication2.Models;
+using MsBox.Avalonia;
+using Newtonsoft.Json;
+namespace AvaloniaApplication2.Windows;
+
+public partial class LoginWindow : Window
+{
+    public LoginWindow()
+    {
+        InitializeComponent();
+    }
+
+    private async void Authorize_OnClick(object? sender, RoutedEventArgs e)
+    {
+        var client = new HttpClient();
+        App.currentClient = client;
+        var email = LoginTextBox.Text;
+        var password = PasswordTextBox.Text;
+        var loginData = new AuthorizationData(){ Email = email, Password = password};
+        var json = JsonConvert.SerializeObject(loginData);
+        var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+        try
+        {
+            var response = await client.PostAsync(App.URL, content);
+            
+            if (response.IsSuccessStatusCode)
+            {
+                var responseContent = await response.Content.ReadAsStringAsync();
+                var result = JsonConvert.DeserializeObject<Token>(responseContent);
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", result.token);
+                App.token = result.token;
+                App.currentUser = result.user;
+                new MainWindow().Show();
+               Close();
+            }
+            else
+            {
+                MessageBoxManager.GetMessageBoxStandard("",response.StatusCode.ToString()).ShowAsync();
+            }
+        }
+        catch (Exception ex)
+        {
+            MessageBoxManager.GetMessageBoxStandard("",$"Произошла ошибка при подключении: {ex.Message}").ShowAsync();
+        }
+    }
+}

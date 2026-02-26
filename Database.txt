@@ -1,0 +1,114 @@
+CREATE table Roles(
+    Id serial primary key ,
+    Name varchar(50)
+);
+
+create table Users(
+    Id varchar(50) primary key ,
+    Full_name varchar(100),
+    Email varchar(50),
+    Phone varchar(20),
+    Role_id int,
+    Password text,
+    Image_base64 text,
+    FOREIGN KEY (Role_id) REFERENCES Roles(Id)
+);
+
+create table Products(
+    Id varchar(50) primary key,
+    Name varchar(50),
+    Description text,
+    Price decimal,
+    Quantity_avaliable int,
+    Min_stock int,
+    Sales_trend decimal
+);
+create table Vending_type(
+    Id serial primary key ,
+    Name varchar(50)
+);
+create table Companies(
+    Id serial primary key,
+    Name varchar(50)
+);
+CREATE table Vending_machines(
+    Id varchar(50) primary key,
+    Model varchar(50),
+    Address varchar(100),
+    Place varchar(30),
+    Total_income decimal,
+    Serial_number varchar(20),
+    Company_id int,
+    Produced_date timestamp,
+    Add_system_date timestamp,
+    Install_date timestamp check ( Install_date>=Produced_date and Install_date<=Add_system_date),
+    Last_maintenance_date timestamp check ( Last_maintenance_date>=Produced_date and Last_maintenance_date<=current_date ),
+    Maintenance_interval int,
+    Vending_resource int check ( Vending_resource>=0 ),
+    Next_maintenance_date timestamp,
+    Maintenance_time int check ( Maintenance_time>=1 and Maintenance_time<=20 ),
+    Status varchar(40) check( Status in('Работает', 'Вышел из строя', 'В ремонте/на обслуживании') ),
+    Producer_country varchar(40) check ( Producer_country in('Россия', 'Китай') ),
+    Inventory_date timestamp check ( Inventory_date>=Produced_date and Inventory_date<=current_date ),
+    Last_maintenance_by varchar(50),
+    foreign key (Company_id) references Companies(Id),
+    foreign key (Last_maintenance_by) references Users(Id)
+);
+
+create table Vending_to_types(
+    Vending_id varchar(50),
+    Type_id int,
+    PRIMARY KEY (Vending_id, Type_id),
+    FOREIGN KEY (Vending_id) references Vending_machines(Id),
+    FOREIGN KEY (Type_id) references Vending_type(Id)
+);
+
+create table Maintenances(
+    Id serial primary key ,
+    Vending_id varchar(50),
+    Maintenance_date timestamp,
+    Description text,
+    Issues_found text,
+    Maintenance_by varchar(100),
+    FOREIGN KEY (Vending_id) references Vending_machines(Id)
+);
+create table Sales(
+    Id serial primary key ,
+    Vending_id varchar(50),
+    Product_id varchar(50),
+    Sold_quantity int,
+    Sold_sum decimal,
+    Sale_timestamp timestamp,
+    Payment_type varchar(50) check ( Payment_type in('Qr-код', 'Наличные', 'Карта') ),
+    FOREIGN KEY (Vending_id) references Vending_machines(Id),
+    FOREIGN KEY (Product_id) references Products(Id)
+);
+
+create or replace function calculate_next_maintenance()
+RETURNS trigger as $$
+    BEGIN
+        if new.Maintenance_interval is not null then
+            new.Next_maintenance_date := new.Last_maintenance_date +(new.Maintenance_interval || ' month')::interval;
+            else
+            new.Next_maintenance_date := null;
+        end if;
+        return new;
+    end;
+    $$ language plpgsql;
+
+create trigger trigger_calculate_next_maintenance
+    before insert or update on Vending_machines
+    FOR each row execute function  calculate_next_maintenance();
+
+create or replace function check_unique_serial_number()
+returns trigger as $$
+    begin if exists(Select 1 from Vending_machines where Serial_number == new.SeSerial_number) then
+        raise exception 'Та с таким серийным номеров уже существует';
+    end if;
+    return new;
+end;
+$$ language plpgsql;
+
+create trigger trigger_check_unique_serial_number
+    before insert or update on Vending_machines
+    for each row execute function  check_unique_serial_number();

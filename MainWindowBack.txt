@@ -1,0 +1,65 @@
+using System;
+using System.ComponentModel;
+using System.IO;
+using System.Runtime.CompilerServices;
+using Avalonia;
+using Avalonia.Controls;
+using System.Drawing;
+using Avalonia.Interactivity;
+using Avalonia.Media.Imaging;
+using AvaloniaApplication2.Pages;
+using MsBox.Avalonia;
+
+namespace AvaloniaApplication2;
+
+public partial class MainWindow : Window
+{
+    
+    public MainWindow()
+    {
+        InitializeComponent();
+        CurrentPage.Content = new MainPage();
+        PageAdress.Text = "Главная";
+        LoadUserInfo();
+    }
+
+    private void ClosePaneButton_OnClick(object? sender, RoutedEventArgs e)
+    {
+         Pane.IsPaneOpen = !Pane.IsPaneOpen;
+    }
+
+    private void MonitoringPageButton_OnClick(object? sender, RoutedEventArgs e)
+    {
+        CurrentPage.Content = new MonitoringPage();
+        PageAdress.Text = "Главная / Монитор ТА";
+    }
+
+    private void MainPageButton_OnClick(object? sender, RoutedEventArgs e)
+    {
+        CurrentPage.Content = new MainPage();
+        PageAdress.Text = "Главная";
+    }
+    
+    private void LoadUserInfo()
+    {
+        InitialsTextBlock.Text = GetInitials(App.currentUser.FullName);
+        RoleTextBlock.Text = App.currentUser.Role;
+        byte[] imageBytes = Convert.FromBase64String(App.currentUser.ImageBase64);
+        MemoryStream ms = new MemoryStream(imageBytes, 0, imageBytes.Length);
+        ms.Write(imageBytes, 0, imageBytes.Length);
+        ms.Position = 0;
+        UserIcon.Source = new Bitmap(ms);
+    }
+
+    private string GetInitials(string s)
+    {
+        var parts = s.Trim().Split(' ');
+        return parts[0]+" "+parts[1][0]+"."+parts[2][0]+'.';
+    }
+
+    private void VendingMachineButton_OnClick(object? sender, RoutedEventArgs e)
+    {
+        CurrentPage.Content = new VendingMachinesPage();
+        PageAdress.Text = "Администрирование / Торговые автоматы";
+    }
+}
