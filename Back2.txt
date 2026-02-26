@@ -1,0 +1,35 @@
+<Grid RowDefinitions="50, Auto">
+        <DockPanel Grid.Row="0">
+            <Image Source="Resources/Logo.png" Height="50" DockPanel.Dock="Left"></Image>
+            <DropDownButton Margin="800, 0, 0, 0" Height="50" Width="180" Background="Transparent" DockPanel.Dock="Right" HorizontalAlignment="Right">
+                <DropDownButton.Content>
+                    <StackPanel Orientation="Horizontal">
+                        <Image Name="UserIcon"></Image>
+                        <StackPanel>
+                            <TextBlock Name="InitialsTextBlock"></TextBlock>
+                            <TextBlock Name="RoleTextBlock"></TextBlock>
+                        </StackPanel>
+                    </StackPanel>
+                </DropDownButton.Content>
+                <DropDownButton.Flyout>
+                    <Flyout Placement="Bottom">
+                        <Grid RowDefinitions="1,40,40,40" Height="121" Background="White" Margin="-10, -10">
+                            <Separator Grid.Row="0"></Separator>
+                            <StackPanel Grid.Row="1" Spacing="10" Width="150" Background="White" Orientation="Horizontal" VerticalAlignment="Center">
+                                <PathIcon Foreground="Gray" Data="{StaticResource userIcon}"></PathIcon>
+                                <TextBlock FontSize="14" Foreground="Gray">Мой профиль</TextBlock>
+                            </StackPanel>
+                            <StackPanel Grid.Row="2" Margin="10" Spacing="10" Width="150" Background="White" Orientation="Horizontal" VerticalAlignment="Center">
+                                <PathIcon Foreground="Gray" Data="{StaticResource lockIcon}"></PathIcon>
+                                <TextBlock FontSize="14" Foreground="Gray">Мои сессии</TextBlock>
+                            </StackPanel>
+                            <StackPanel Grid.Row="3" Margin="10" Spacing="10" Width="150" Background="White" Orientation="Horizontal" VerticalAlignment="Center">
+                                <PathIcon Foreground="Gray" Data="{StaticResource powerOffIcon}"></PathIcon>
+                                <TextBlock FontSize="14" Foreground="Gray">Выход</TextBlock>
+                            </StackPanel>
+                        </Grid>
+                       
+                    </Flyout>
+                </DropDownButton.Flyout>
+            </DropDownButton>
+        </DockPanel>
