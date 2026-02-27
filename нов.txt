@@ -1,0 +1,76 @@
+@page
+@using System.Globalization
+@model IndexModel
+
+@{
+ViewData["Title"] = "Calendar";
+
+var culture = new CultureInfo("la-LA");
+
+var prevYear = Model.Year - 1;
+var nextYear = Model.Year + 1;
+
+var prevMonth = new DateTime(Model.Year, Model.Month, 1).AddMonths(-1);
+var nextMonth = new DateTime(Model.Year, Model.Month, 1).AddMonths(1);
+
+var prevWeek = Model.SelectedWeekStart.AddDays(-7);
+var nextWeek = Model.SelectedWeekStart.AddDays(7);
+
+var monthName = new DateTime(Model.Year, Model.Month, 1)
+.ToString("MMMM", culture)
+.ToUpper();
+}
+
+<h2 style="text-align:center">
+
+    <!-- ГОД -->
+    <a asp-route-year="@prevYear" asp-route-month="1">«</a>
+    @Model.Year
+    <a asp-route-year="@nextYear" asp-route-month="1">»</a>
+
+    <br />
+
+    <!-- МЕСЯЦ -->
+    <a asp-route-year="@prevMonth.Year"
+       asp-route-month="@prevMonth.Month">‹</a>
+
+    @monthName
+
+    <a asp-route-year="@nextMonth.Year"
+       asp-route-month="@nextMonth.Month">›</a>
+
+    <br />
+
+    <!-- НЕДЕЛЯ -->
+    <a asp-route-weekStart="@prevWeek.ToString("yyyy-MM-dd")">‹</a>
+
+    @ISOWeek.GetWeekOfYear(Model.SelectedWeekStart)
+
+    <a asp-route-weekStart="@nextWeek.ToString("yyyy-MM-dd")">›</a>
+
+</h2>
+
+<table border="1" style="width:100%; border-collapse:collapse; text-align:center">
+    <tbody>
+    @foreach (var week in Model.Weeks)
+    {
+    <tr style="@(week.IsSelected ? "background-color:#d1ecf1;font-weight:bold;" : "")">
+        <td>@week.WeekNumber</td>
+
+        @foreach (var day in week.Days)
+        {
+        <td>
+            @if (day.Date.Month == Model.Month)
+            {
+            @day.Date.Day
+            }
+            else
+            {
+            <span style="color:#ccc">@day.Date.Day</span>
+            }
+        </td>
+        }
+    </tr>
+    }
+    </tbody>
+</table>

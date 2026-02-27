@@ -1,0 +1,77 @@
+using System.Globalization;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+
+public class IndexModel : PageModel
+{
+    public int Year { get; set; }
+    public int Month { get; set; }
+    public DateTime SelectedWeekStart { get; set; }
+
+    public List<CalendarWeek> Weeks { get; set; } = new();
+
+    public void OnGet(int? year, int? month, DateTime? weekStart)
+    {
+        var baseDate = weekStart ?? new DateTime(
+            year ?? DateTime.Today.Year,
+            month ?? DateTime.Today.Month,
+            1
+        );
+
+        SelectedWeekStart = GetMonday(baseDate);
+        Year = SelectedWeekStart.Year;
+        Month = SelectedWeekStart.Month;
+
+        GenerateCalendar();
+    }
+
+    private void GenerateCalendar()
+    {
+        Weeks.Clear();
+
+        var firstDay = new DateTime(Year, Month, 1);
+        var lastDay = firstDay.AddMonths(1).AddDays(-1);
+
+        var current = GetMonday(firstDay);
+        var end = GetMonday(lastDay).AddDays(6);
+
+        while (current <= end)
+        {
+            Weeks.Add(CreateWeek(current));
+            current = current.AddDays(7);
+        }
+    }
+
+    private CalendarWeek CreateWeek(DateTime monday)
+    {
+        var days = Enumerable.Range(0, 7)
+            .Select(i => new CalendarDay { Date = monday.AddDays(i) })
+            .ToList();
+
+        return new CalendarWeek
+        {
+            WeekStart = monday,
+            WeekNumber = ISOWeek.GetWeekOfYear(monday),
+            Days = days,
+            IsSelected = monday == SelectedWeekStart
+        };
+    }
+
+    private static DateTime GetMonday(DateTime date)
+    {
+        int diff = (7 + (date.DayOfWeek - DayOfWeek.Monday)) % 7;
+        return date.AddDays(-diff).Date;
+    }
+}
+
+public class CalendarWeek
+{
+    public DateTime WeekStart { get; set; }
+    public int WeekNumber { get; set; }
+    public List<CalendarDay> Days { get; set; } = new();
+    public bool IsSelected { get; set; }
+}
+
+public class CalendarDay
+{
+    public DateTime Date { get; set; }
+}
