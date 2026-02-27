@@ -1,0 +1,178 @@
+using System.Globalization;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
+using RazorPages.Models;
+
+namespace RazorPages.Pages;
+
+public class MaintenanceCalendar : PageModel
+{
+private readonly MyDbContext _context;
+
+    public MaintenanceCalendar(MyDbContext context)
+    {
+        _context = context;
+    }
+
+    public int Year { get; set; }
+    public int Month { get; set; }
+
+    public DateTime CurrentDate { get; set; }
+    public DateTime SelectedWeekStart { get; set; }
+
+    public List<CalendarWeek> Weeks { get; set; } = new();
+    private List<MaintenanceCalendarItem> CalendarItems { get; set; } = new();
+
+    public void OnGet(int? year, int? month, DateTime? weekStart)
+    {
+        var today = DateTime.Today;
+
+        if (weekStart.HasValue)
+        {
+            SelectedWeekStart = GetMonday(weekStart.Value);
+            Year = weekStart.Value.Year;
+            Month = weekStart.Value.Month;
+        }
+        else
+        {
+            Year = year ?? today.Year;
+            Month = month ?? today.Month;
+
+            SelectedWeekStart = GetMonday(new DateTime(Year, Month, 1));
+        }
+
+        CurrentDate = new DateTime(Year, Month, 1);
+
+        LoadMaintenanceData();
+        GenerateCalendar();
+    }
+
+    private void LoadMaintenanceData()
+    {
+        var machines = _context.VendingMachines
+            .AsNoTracking()
+            .Where(m => m.MaintenanceInterval.HasValue)
+            .ToList();
+
+        CalendarItems = machines
+            .Select(m =>
+            {
+                var lastDate = m.LastMaintenanceDate;
+                var nextDate =Convert.ToDateTime(lastDate).AddMonths(m.MaintenanceInterval!.Value);
+
+                return new MaintenanceCalendarItem
+                {
+                    MachineId = m.Id,
+                    MachineName = m.Address ?? m.Place,
+                    NextMaintenanceDate = nextDate,
+                    Status = GetStatus(nextDate)
+                };
+            })
+            .ToList();
+    }
+
+    private void GenerateCalendar()
+    {
+        Weeks.Clear();
+
+        var firstDay = new DateTime(Year, Month, 1);
+        var lastDay = firstDay.AddMonths(1).AddDays(-1);
+
+        var start = GetMonday(firstDay);
+        var end = GetMonday(lastDay).AddDays(6);
+
+        var current = start;
+
+        while (current <= end)
+        {
+            Weeks.Add(CreateWeek(current));
+            current = current.AddDays(7);
+        }
+    }
+
+    private CalendarWeek CreateWeek(DateTime monday)
+    {
+        var days = new List<CalendarDay>();
+
+        for (int i = 0; i < 7; i++)
+        {
+            var date = monday.AddDays(i);
+
+            var dayItems = CalendarItems
+                .Where(x => x.NextMaintenanceDate.Date == date.Date)
+                .ToList();
+
+            days.Add(new CalendarDay
+            {
+                Date = date,
+                Items = dayItems
+            });
+        }
+
+        return new CalendarWeek
+        {
+            WeekStart = monday,
+            WeekNumber = ISOWeek.GetWeekOfYear(monday),
+            Days = days,
+            IsSelected = monday.Date == SelectedWeekStart.Date
+        };
+    }
+
+    private MaintenanceStatus GetStatus(DateTime nextDate)
+    {
+        var today = DateTime.Today;
+
+        if (today > nextDate)
+            return MaintenanceStatus.Overdue;
+
+        if ((nextDate - today).TotalDays <= 5)
+            return MaintenanceStatus.Warning;
+
+        return MaintenanceStatus.Planned;
+    }
+
+    private DateTime GetMonday(DateTime date)
+    {
+        int diff = (7 + (date.DayOfWeek - DayOfWeek.Monday)) % 7;
+        return date.AddDays(-diff).Date;
+    }
+}
+public class CalendarWeek
+{
+    public DateTime WeekStart { get; set; }
+    public int WeekNumber { get; set; }
+    public List<CalendarDay> Days { get; set; } = new();
+    public bool IsSelected { get; set; }
+}
+public class CalendarDay
+{
+    public DateTime Date { get; set; }
+    public List<MaintenanceCalendarItem> Items { get; set; } = new();
+
+    public string GetColor()
+    {
+        if (!Items.Any())
+            return "";
+
+        if (Items.Any(i => i.Status == MaintenanceStatus.Overdue))
+            return "background-color:#dc3545;color:white;";
+
+        if (Items.Any(i => i.Status == MaintenanceStatus.Warning))
+            return "background-color:#ffc107;";
+
+        return "background-color:#198754;color:white;";
+    }
+}
+public class MaintenanceCalendarItem
+{
+    public string MachineId { get; set; } = string.Empty;
+    public string? MachineName { get; set; }
+    public DateTime NextMaintenanceDate { get; set; }
+    public MaintenanceStatus Status { get; set; }
+}
+public enum MaintenanceStatus
+{
+    Planned,
+    Warning,
+    Overdue
+}

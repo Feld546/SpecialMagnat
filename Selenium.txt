@@ -1,0 +1,53 @@
+using OpenQA.Selenium;
+using OpenQA.Selenium.Chrome;
+
+namespace SeleniumTests
+{
+    public class Tests
+    {
+        [Test]
+        public void TitleTest()
+        {
+            using var driver = new ChromeDriver();
+            driver.Url = "https://localhost:7238/";
+            Assert.That(driver.Title, Is.EqualTo("Торговые аппараты"));
+        }
+        [Test]
+        public void TranslateTest()
+        {
+            using var driver = new ChromeDriver();
+            driver.Url = "https://localhost:7238/";
+            driver.FindElement(By.XPath("/html/body/header/nav/div/div/ul/li[4]/a[2]")).Click();
+            Assert.That(driver.FindElement(By.XPath("/html/body/div/main/h2")).Text == "Vending machines");
+        }
+        [Test]
+        public void UrlTest()
+        {
+            using var driver = new ChromeDriver();
+            driver.Url = "https://localhost:7238/";
+            driver.FindElement(By.XPath("/html/body/header/nav/div/div/ul/li[2]/a")).Click();
+            Assert.That(driver.Url.Contains("/WorkGraphic"));
+        }
+
+        [Test]
+        public void EmptyUploadTest()
+        {
+            using var driver = new ChromeDriver();
+            driver.Url = "https://localhost:7238/";
+            driver.FindElement(By.XPath("/html/body/div/main/form/button")).Click();
+            IJavaScriptExecutor js = driver;
+            var fileInput = driver.FindElement(By.XPath("/html/body/div/main/form/input[1]"));
+            var validationMessage = js.ExecuteScript("return arguments[0].validationMessage", fileInput)!.ToString()!;
+            Assert.That(validationMessage, Is.Not.Empty);
+        }
+        [Test]
+        public void VisibilityTest()
+        {
+            using var driver = new ChromeDriver();
+            driver.Url = "https://localhost:7238/";
+            Assert.That(driver.FindElement(By.XPath("/html/body/header/nav/div/div/ul")).Displayed
+                && driver.FindElement(By.XPath("/html/body/div")).Displayed &&
+            driver.FindElement(By.XPath("/html/body/footer/div")).Displayed);
+        }
+    }
+}

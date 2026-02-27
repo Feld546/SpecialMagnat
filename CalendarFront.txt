@@ -1,0 +1,101 @@
+@page
+@model MaintenanceCalendar
+@using System.Globalization
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<SharedResource> Shared
+
+<title>@Shared["MaintenanceCalendar"]</title>
+<h2>@Shared["MaintenanceCalendar"]</h2>
+@{
+    var culture = new CultureInfo(@Shared["la-LA"]);
+
+    // --- ГОД ---
+    var prevYear = Model.Year - 1;
+    var nextYear = Model.Year + 1;
+
+    // --- МЕСЯЦ ---
+    var prevMonthDate = Model.CurrentDate.AddMonths(-1);
+    var nextMonthDate = Model.CurrentDate.AddMonths(1);
+
+    // --- НЕДЕЛЯ ---
+    var prevWeek = Model.SelectedWeekStart.AddDays(-7);
+    var nextWeek = Model.SelectedWeekStart.AddDays(7);
+
+    var monthName = Model.CurrentDate.ToString("MMMM", culture);
+}
+
+<h2 style="text-align:center">
+
+    <!-- ГОД -->
+    <a asp-route-year="@prevYear"
+       asp-route-month="1">«</a>
+
+    @Model.Year
+
+    <a asp-route-year="@nextYear"
+       asp-route-month="1">»</a>
+
+    <br />
+
+    <!-- МЕСЯЦ -->
+    <a asp-route-year="@prevMonthDate.Year"
+       asp-route-month="@prevMonthDate.Month">‹</a>
+
+    @monthName.ToUpper()
+
+    <a asp-route-year="@nextMonthDate.Year"
+       asp-route-month="@nextMonthDate.Month">›</a>
+
+    <br />
+
+    <!-- НЕДЕЛЯ -->
+    <a asp-route-weekStart="@prevWeek.ToString("yyyy-MM-dd")">‹</a>
+
+    @Shared["Week"] @ISOWeek.GetWeekOfYear(Model.SelectedWeekStart)
+
+    <a asp-route-weekStart="@nextWeek.ToString("yyyy-MM-dd")">›</a>
+
+</h2>
+
+<table border="1"
+       style="width:100%; border-collapse:collapse; text-align:center">
+
+    <thead>
+        <tr>
+            <th>@Shared["Week"]</th>
+            <th>@Shared["Monday"]</th>
+            <th>@Shared["Tuesday"]</th>
+            <th>@Shared["Wednesday"]</th>
+            <th>@Shared["Thursday"]</th>
+            <th>@Shared["Friday"]</th>
+            <th>@Shared["Saturday"]</th>
+            <th>@Shared["Sunday"]</th>
+        </tr>
+    </thead>
+
+    <tbody>
+    @foreach (var week in Model.Weeks)
+    {
+        <tr style="@(week.IsSelected ? "background-color:#d1ecf1;font-weight:bold;" : "")">
+            <td>@week.WeekNumber</td>
+
+            @foreach (var day in week.Days)
+            {
+                <td style="@day.GetColor()">
+
+                    @if (day.Date.Month == Model.Month)
+                    {
+                        <div>@day.Date.Day</div>
+                    }
+                    else
+                    {
+                        <div style="color:#ccc">@day.Date.Day</div>
+                    }
+                    
+
+                </td>
+            }
+        </tr>
+    }
+    </tbody>
+</table>

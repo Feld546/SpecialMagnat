@@ -1,0 +1,146 @@
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.Extensions.Localization;
+using OfficeOpenXml;
+using RazorPages.Models;
+
+namespace RazorPages.Pages;
+
+public class Index : PageModel
+{
+    private readonly MyDbContext _context;
+    private readonly IStringLocalizer<SharedResource> _shared;
+    public Index(IStringLocalizer<SharedResource> shared, MyDbContext context)
+    {
+        _context = context;
+        _shared = shared;
+    }
+    [BindProperty]
+    public IFormFile UploadFile { get; set; }
+
+    public List<string> Errors { get; set; } = new();
+    public bool Success { get; set; }
+
+    public async Task<IActionResult> OnPostAsync()
+    {
+        if (UploadFile == null || UploadFile.Length == 0)
+        {
+            Errors.Add(_shared["FileNotSelected"]);
+            return Page();
+        }
+
+        var extension = Path.GetExtension(UploadFile.FileName).ToLower();
+
+        if (extension == ".csv")
+            await ProcessCsv();
+        else if (extension == ".xlsx")
+            await ProcessXlsx();
+        else
+            Errors.Add(_shared["Unsupported format"]);
+
+        if (!Errors.Any())
+        {
+            await _context.SaveChangesAsync();
+            Success = true;
+        }
+
+        return Page();
+    }
+
+    public void OnGet()
+    {
+        
+    }
+    private async Task ProcessXlsx()
+    {
+        ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+        using var package = new ExcelPackage(UploadFile.OpenReadStream());
+        var sheet = package.Workbook.Worksheets[0];
+    
+        for (int row = 2; row <= sheet.Dimension.End.Row; row++)
+        {
+            var serial = sheet.Cells[row, 1].Text;
+    
+            if (string.IsNullOrWhiteSpace(serial))
+            {
+                Errors.Add(_shared["Row"]+$"{row} "+ _shared["NullSerialNumber"]);
+                continue;
+            }
+    
+            if (_context.VendingMachines.Any(x => x.SerialNumber.ToString() == sheet.Cells[row, 4].Text))
+            {
+                Errors.Add(_shared["Row"]+$"{row} "+ _shared["DuplicateSerialNumber"]);
+                continue;
+            }
+
+            if (string.IsNullOrWhiteSpace(serial))
+            {
+                Errors.Add(_shared["Row"]+$"{row} "+ _shared["NullD"]);
+                continue;
+            }
+
+            if (_context.VendingMachines.Any(x => x.Id == sheet.Cells[row, 4].Text))
+            {
+                Errors.Add(_shared["Row"]+$"{row} "+ _shared["DuplicateID"]);
+                continue;
+            }
+    
+            _context.VendingMachines.Add(new VendingMachine
+            {
+                SerialNumber =Convert.ToInt64(serial),
+                Model = sheet.Cells[row, 2].Text,
+                Location = sheet.Cells[row, 3].Text,
+                Id = sheet.Cells[row, 4].Text,
+                UserId = sheet.Cells[row, 5].Text,
+                Operator = sheet.Cells[row, 6].Text
+            });
+            await _context.SaveChangesAsync();
+        }
+    }
+    private async Task ProcessCsv()
+    {
+        using var reader = new StreamReader(UploadFile.OpenReadStream());
+        int row = 1;
+    
+        while (!reader.EndOfStream)
+        {
+            row++;
+            var line = await reader.ReadLineAsync();
+            var data = line.Split(';');
+    
+            if (data.Length < 6)
+            {
+                Errors.Add(_shared["Row"]+$"{row} "+ _shared["NotEnoughData"]);
+                continue;
+            }
+
+            if (data.Length > 6)
+            {
+                Errors.Add(_shared["Row"]+$"{row} "+ _shared["TooManyData"]);
+                continue;
+            }
+            if (_context.VendingMachines.Any(x => x.SerialNumber.ToString() == data[0]))
+            {
+                Errors.Add(_shared["Row"]+$"{row} "+ _shared["DuplicateSerialNumber"]);
+                continue;
+            }
+            if (_context.VendingMachines.Any(x => x.Id == data[3]))
+            {
+                Errors.Add(_shared["Row"]+$"{row} "+ _shared["DuplicateID"]);
+                continue;
+            }
+            
+    
+            _context.VendingMachines.Add(new VendingMachine
+            {
+                Id = data[3],
+                Model = data[1],
+                Location = data[2],
+                SerialNumber = Convert.ToInt64(data[0]),
+                UserId = data[4],
+                Operator = data[5]
+            });
+        }
+    }
+
+}

@@ -1,0 +1,71 @@
+using ModuleTests.Models;
+namespace ModuleTests
+{
+    public class Tests
+    {
+        public KonkursdbContext db2Context = new();
+        string vendingId = "166c8a3f-a211-4d25-b2d4-a5b0b5f067d5";
+        [Test]
+        public void NextDateTest()
+        {
+            var testVending = db2Context.VendingMachines.FirstOrDefault(x => x.Id == vendingId);
+
+            Assert.That(NextDate(DateOnly.Parse("2025 - 03 - 07"), 1), Is.EqualTo(testVending.NextMaintenance));
+        }
+
+        public DateOnly NextDate(DateOnly lastDate, int interval)
+        {
+            return lastDate.AddMonths(interval);
+        }
+
+        [Test]
+        public void HoursPerDayTest()
+        {
+            List<Task> tasks = new()
+    {
+     new Task("Task 1", 3),
+    new Task("Task 2", 4)
+};
+          var result =  GetHoursPerDay(tasks);
+            var actual = new List<String> { "Сотрудник 1 отработал 5 часов", "Сотрудник 2 отработал 6 часов" };
+            Assert.That(result, Is.EqualTo(actual));
+        }
+        public static List<string> GetHoursPerDay(List<Task> tasks)
+        {
+            List<string> result = new();
+            int hours = 0;
+            int employee = 1;
+
+            foreach (var task in tasks)
+            {
+                if (hours + task.Hours+2 > 10)
+                {
+                    result.Add($"Сотрудник {employee} отработал {hours} часов");
+                    employee++;
+                    hours = 0;
+                }
+
+                hours += task.Hours+2;
+            }
+
+            // добавляем последнего сотрудника
+            if (hours > 0)
+            {
+                result.Add($"Сотрудник {employee} отработал {hours} часов");
+            }
+
+            return result;
+        }
+    }
+    public class Task
+    {
+        public string Name { get; }
+        public int Hours { get; }
+
+        public Task(string name, int hours)
+        {
+            Name = name;
+            Hours = hours;
+        }
+    }
+}

@@ -1,0 +1,29 @@
+@page
+@using Microsoft.AspNetCore.Mvc.Localization
+@using Microsoft.Extensions.Localization
+@model Index
+@inject IStringLocalizer<SharedResource> Shared
+
+<head>
+<title>@Shared["VmTitle"]</title>
+</head>
+<h2>@Shared["VmTitle"]</h2>
+<form method="post" enctype="multipart/form-data">
+    <input type="file" title="@Shared["ChooseFile"]" name="UploadFile" accept=".csv,.xlsx" required />
+    <button type="submit">@Shared["Upload file"]</button>
+</form>
+
+@if (Model.Errors.Any())
+{
+    <ul style="color:red">
+        @foreach (var error in Model.Errors)
+        {
+            <li>@error</li>
+        }
+    </ul>
+}
+
+@if (Model.Success)
+{
+    <p style="color:green">@Shared["Data uploaded successfully"]</p>
+}
