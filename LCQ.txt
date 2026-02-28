@@ -1,0 +1,27 @@
+  // GET: api/User
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<User>>> GetUsers()
+        {
+            return await _context.Users.ToListAsync();
+        }
+
+        // GET: api/User/5
+        [HttpGet("{id}")]
+        public async Task<ActionResult<User>> GetUser(string id)
+        {
+            var user = await _context.Users.FindAsync(id);
+
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            return user;
+        }
+
+var tokenOptions = new JwtSecurityToken(               
+    issuer: "http://localhost:7243",                   
+    audience: "http://localhost:7243",                 
+    claims: claims,                                    
+    expires: DateTime.UtcNow.AddMinutes(20),           
+    signingCredentials: signinCredentials);            
